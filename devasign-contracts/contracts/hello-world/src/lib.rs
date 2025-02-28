@@ -59,13 +59,14 @@ impl DevAsignContract {
         // Authenticate the caller
         manager.require_auth();
 
-        // Generate a unique project ID
+        // Generate a unique project ID using timestamp
         let timestamp = env.ledger().timestamp();
-        
-        // Use a timestamp-based approach for ID generation
         let timestamp_bytes = timestamp.to_be_bytes();
-        let project_id_preimage = Bytes::from_slice(&env, &timestamp_bytes);
-        let project_id = env.crypto().sha256(&project_id_preimage);
+        
+        // Create a unique seed for the project ID
+        let seed = Bytes::from_slice(&env, &timestamp_bytes);
+        let hash = env.crypto().sha256(&seed);
+        let project_id = BytesN::from_array(&env, &hash.to_array());
 
         // Create the project
         let project = Project {
@@ -116,20 +117,31 @@ impl DevAsignContract {
         // Require manager authorization
         manager.require_auth();
         
-        // Generate a unique task ID - using timestamp and project_id
+        // Generate a unique task ID using timestamp and project_id
         let timestamp = env.ledger().timestamp();
         let timestamp_bytes = timestamp.to_be_bytes();
+        // Combine timestamp with project_id for uniqueness
         
-        // Combine project_id and timestamp to create a unique task ID
-        let mut task_id_preimage = Bytes::new(&env);
+        // First, convert project_id to raw bytes
+        let mut raw_bytes = Vec::new(&env);
         for i in 0..32 {
-            task_id_preimage.push_back(project_id.get);
-        }
-        for byte in timestamp_bytes.iter() {
-            task_id_preimage.push_back(*byte);
+            raw_bytes.push_back(project_id.get(i));
         }
         
-        let task_id = env.crypto().sha256(&task_id_preimage);
+        // Then add timestamp bytes
+        for b in timestamp_bytes.iter() {
+            raw_bytes.push_back(*b);
+        }
+        
+        // Convert Vec<u8> to Bytes
+        let mut seed = Bytes::new(&env);
+        for b in raw_bytes.iter() {
+            seed.write_u8(b);
+        }
+        
+        let hash = env.crypto().sha256(&seed);
+        let task_id = BytesN::from_array(&env, &hash.to_array());
+        let task_id = env.crypto().sha256(&seed);
 
         // Create the task
         let task = Task {

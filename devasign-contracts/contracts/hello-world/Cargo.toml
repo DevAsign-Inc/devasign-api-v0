@@ -7,13 +7,13 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-soroban-sdk = "20.0.0"
+soroban-sdk = "22.0.7"
 
 # If you're working with tokens, you might need this
-soroban-token-sdk = "20.0.0"
+soroban-token-sdk = "22.0.7"
 
 [dev-dependencies]
-soroban-sdk = { version = "20.0.0", features = ["testutils"] }
+soroban-sdk = { version = "22.0.7", features = ["testutils"] }
 
 [features]
 testutils = ["soroban-sdk/testutils"]
