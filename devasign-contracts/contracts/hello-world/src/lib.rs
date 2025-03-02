@@ -139,11 +139,23 @@ impl DevAsignContract {
         // Generate a unique task ID using timestamp and project_id
         let timestamp = env.ledger().timestamp();
         
-        // Create a simple string representation of project_id and timestamp 
+        // Create separate seeds with the project ID and timestamp
+        let project_seed = Bytes::from_array(&env, &project_id.to_array());
         let timestamp_bytes = timestamp.to_be_bytes();
-        let mut seed_bytes = project_id.to_array().to_vec();
-        seed_bytes.extend_from_slice(&timestamp_bytes);
-        let seed = Bytes::from_slice(&env, &seed_bytes);
+        let timestamp_seed = Bytes::from_slice(&env, &timestamp_bytes);
+        
+        // Hash each one separately
+        let project_hash = env.crypto().sha256(&project_seed);
+        let timestamp_hash = env.crypto().sha256(&timestamp_seed);
+        
+        // XOR the hashes to create a combined seed
+        let mut combined_bytes = [0u8; 32];
+        for i in 0..32 {
+            combined_bytes[i] = project_hash.to_array()[i] ^ timestamp_hash.to_array()[i];
+        }
+        
+        // Create the final seed
+        let seed = Bytes::from_array(&env, &combined_bytes);
         // This is a simple approach that doesn't fully utilize the properties 
         // of the input data, but it's robust for generating a unique identifier
         
