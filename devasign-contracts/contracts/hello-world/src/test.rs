@@ -127,6 +127,13 @@ fn test_developer_application_workflow() {
     assert_eq!(task.status, TaskStatus::Assigned);
     assert_eq!(task.assigned_developer, Some(developer.clone()));
     
+    // Developer starts the task
+    client.start_task(&task_id, &developer);
+    
+    // Verify task is in progress
+    let task = client.get_task(&task_id).unwrap();
+    assert_eq!(task.status, TaskStatus::InProgress);
+    
     // Developer marks task as completed
     client.mark_task_completed(&task_id, &developer);
     

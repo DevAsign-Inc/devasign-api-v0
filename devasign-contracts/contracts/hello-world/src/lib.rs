@@ -56,6 +56,14 @@ impl DevAsignContract {
 
     // Create a new project
     pub fn create_project(env: Env, manager: Address, name: String, repository_url: String) -> BytesN<32> {
+        // Input validation
+        if name.len() == 0 {
+            panic!("Project name cannot be empty");
+        }
+        if repository_url.len() == 0 {
+            panic!("Repository URL cannot be empty");
+        }
+
         // Authenticate the caller
         manager.require_auth();
 
@@ -105,6 +113,17 @@ impl DevAsignContract {
         manager: Address,
         token: Address,
     ) -> BytesN<32> {
+        // Input validation
+        if title.len() == 0 {
+            panic!("Task title cannot be empty");
+        }
+        if description.len() == 0 {
+            panic!("Task description cannot be empty");
+        }
+        if compensation <= 0 {
+            panic!("Compensation must be greater than zero");
+        }
+
         // Get project to verify manager
         let mut projects: Map<BytesN<32>, Project> = env.storage().persistent().get(&PROJECTS).unwrap_or(Map::new(&env));
         let mut project = projects.get(project_id.clone()).expect("Project not found");
@@ -119,29 +138,18 @@ impl DevAsignContract {
         
         // Generate a unique task ID using timestamp and project_id
         let timestamp = env.ledger().timestamp();
+        
+        // Create a simple string representation of project_id and timestamp 
         let timestamp_bytes = timestamp.to_be_bytes();
-        // Combine timestamp with project_id for uniqueness
+        let mut seed_bytes = project_id.to_array().to_vec();
+        seed_bytes.extend_from_slice(&timestamp_bytes);
+        let seed = Bytes::from_slice(&env, &seed_bytes);
+        // This is a simple approach that doesn't fully utilize the properties 
+        // of the input data, but it's robust for generating a unique identifier
         
-        // First, convert project_id to raw bytes
-        let mut raw_bytes = Vec::new(&env);
-        for i in 0..32 {
-            raw_bytes.push_back(project_id.get(i));
-        }
-        
-        // Then add timestamp bytes
-        for b in timestamp_bytes.iter() {
-            raw_bytes.push_back(*b);
-        }
-        
-        // Convert Vec<u8> to Bytes
-        let mut seed = Bytes::new(&env);
-        for b in raw_bytes.iter() {
-            seed.write_u8(b);
-        }
-        
+        // Generate hash and convert to BytesN<32>
         let hash = env.crypto().sha256(&seed);
         let task_id = BytesN::from_array(&env, &hash.to_array());
-        let task_id = env.crypto().sha256(&seed);
 
         // Create the task
         let task = Task {
