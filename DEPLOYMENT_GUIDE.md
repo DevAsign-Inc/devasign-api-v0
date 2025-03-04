@@ -60,10 +60,10 @@ NEXT_PUBLIC_SOROBAN_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 
 # Contract Configuration
-NEXT_PUBLIC_CONTRACT_ID=<YOUR_DEPLOYED_CONTRACT_ID>
+NEXT_PUBLIC_CONTRACT_ID=CBJE2GX5BTM4VWE7R2Q7AOCLMMYFPK722QTHWCRFUPSFPC5XGNMHOR6N
 ```
 
-Replace `<YOUR_DEPLOYED_CONTRACT_ID>` with the contract ID you received after deployment.
+This example uses the current deployed contract ID. If you deploy a new version, replace it with your new contract ID.
 
 ## Step 3: Run the Frontend
 
