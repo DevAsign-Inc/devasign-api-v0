@@ -1,5 +1,6 @@
 const express = require('express');
-const check = require('../middleware/customValidators');
+const { check } = require('express-validator');
+const validators = require('../middleware/customValidators');
 const {
   register,
   login,
@@ -41,7 +42,7 @@ router.post(
 router.post(
   '/wallet/init',
   [
-    check('stellarAddress', 'Valid Stellar address is required').isStellarAddress()
+    check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress)
   ],
   checkValidation,
   initWalletAuth
@@ -50,8 +51,8 @@ router.post(
 router.post(
   '/wallet/verify',
   [
-    check('stellarAddress', 'Valid Stellar address is required').isStellarAddress(),
-    check('signature', 'Valid signature is required').isValidSignature()
+    check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress),
+    check('signature', 'Valid signature is required').custom(validators.isValidSignature)
   ],
   checkValidation,
   verifyWalletAuth
@@ -62,7 +63,7 @@ router.post(
   '/wallet/connect',
   protect,
   [
-    check('stellarAddress', 'Valid Stellar address is required').isStellarAddress()
+    check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress)
   ],
   checkValidation,
   connectWallet
@@ -72,8 +73,8 @@ router.post(
 router.post(
   '/wallet/contract/auth',
   [
-    check('stellarAddress', 'Valid Stellar address is required').isStellarAddress(),
-    check('contractId', 'Valid contract ID is required').isContractId(),
+    check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress),
+    check('contractId', 'Valid contract ID is required').custom(validators.isContractId),
     check('functionName', 'Function name is required').not().isEmpty()
   ],
   checkValidation,
