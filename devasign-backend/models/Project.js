@@ -24,6 +24,10 @@ const ProjectSchema = new mongoose.Schema({
   endDate: {
     type: Date
   },
+  budget: {
+    type: Number,
+    default: 0
+  },
   owner: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
@@ -33,6 +37,19 @@ const ProjectSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   }],
+  // Blockchain integration fields
+  contractTxHash: {
+    type: String,
+    sparse: true
+  },
+  isOnChain: {
+    type: Boolean,
+    default: false
+  },
+  contractId: {
+    type: String,
+    sparse: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

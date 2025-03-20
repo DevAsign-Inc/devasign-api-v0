@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const StellarSdk = require('stellar-sdk');
 
 // Middleware to check validation results
 exports.checkValidation = (req, res, next) => {
@@ -26,4 +27,20 @@ exports.isValidDate = (dateString) => {
 exports.isValidEmail = (email) => {
   const regEx = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   return regEx.test(email);
+};
+
+// Stellar address validation
+exports.isValidStellarAddress = (address) => {
+  try {
+    // Check if the address starts with a G and is 56 characters long
+    if (!address.startsWith('G') || address.length !== 56) {
+      return false;
+    }
+    
+    // Try to create a keypair from the address
+    StellarSdk.Keypair.fromPublicKey(address);
+    return true;
+  } catch (error) {
+    return false;
+  }
 };

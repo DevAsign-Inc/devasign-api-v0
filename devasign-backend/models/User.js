@@ -5,24 +5,30 @@ const jwt = require('jsonwebtoken');
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please add a name'],
     trim: true,
     maxlength: [50, 'Name cannot be more than 50 characters']
   },
   email: {
     type: String,
-    required: [true, 'Please add an email'],
-    unique: true,
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
       'Please add a valid email'
-    ]
+    ],
+    sparse: true
   },
   password: {
     type: String,
-    required: [true, 'Please add a password'],
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
+  },
+  stellarAddress: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  nonce: {
+    type: String,
+    default: () => Math.floor(Math.random() * 1000000).toString()
   },
   role: {
     type: String,
@@ -35,10 +41,11 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
-// Encrypt password using bcrypt
+// Encrypt password using bcrypt (only if password exists)
 UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     next();
+    return;
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -54,7 +61,14 @@ UserSchema.methods.getSignedJwtToken = function() {
 
 // Match user entered password to hashed password in database
 UserSchema.methods.matchPassword = async function(enteredPassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Generate a new nonce for the user
+UserSchema.methods.generateNonce = function() {
+  this.nonce = Math.floor(Math.random() * 1000000).toString();
+  return this.nonce;
 };
 
 module.exports = mongoose.model('User', UserSchema);

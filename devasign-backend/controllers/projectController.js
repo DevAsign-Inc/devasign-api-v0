@@ -94,12 +94,46 @@ exports.createProject = async (req, res, next) => {
 
     // Add user to req.body as owner
     req.body.owner = req.user.id;
+    
+    // Get the project data
+    const { name, description, budget, deadline } = req.body;
+    
+    // Check if user has a connected wallet
+    if (req.user.stellarAddress) {
+      try {
+        // Include contract service
+        const contractService = require('../utils/contractService');
+        const mongoose = require('mongoose');
+        
+        // Create a unique project ID
+        const projectId = new mongoose.Types.ObjectId().toString();
+        
+        // Try to create the project on the blockchain
+        if (process.env.CONTRACT_ID) {
+          const contractResult = await contractService.createProject(
+            req.user.stellarAddress,
+            projectId,
+            name,
+            description,
+            budget
+          );
+          
+          // Store the transaction hash in the project
+          req.body.contractTxHash = contractResult.txHash;
+          req.body._id = projectId;
+        }
+      } catch (contractError) {
+        console.error('Contract interaction error:', contractError);
+        // Continue with database creation even if contract interaction fails
+      }
+    }
 
     const project = await Project.create(req.body);
 
     res.status(201).json({
       success: true,
-      data: project
+      data: project,
+      onChain: !!req.body.contractTxHash
     });
   } catch (err) {
     next(err);
