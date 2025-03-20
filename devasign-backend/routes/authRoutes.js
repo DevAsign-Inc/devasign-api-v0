@@ -2,45 +2,21 @@ const express = require('express');
 const { check } = require('express-validator');
 const validators = require('../middleware/customValidators');
 const {
-  register,
-  login,
   getMe,
   logout,
   initWalletAuth,
   verifyWalletAuth,
-  connectWallet
+  updateProfile
 } = require('../controllers/authController');
 
 const router = express.Router();
 
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const { checkValidation } = require('../utils/validators');
 
-// Email/password authentication routes (keeping for backward compatibility)
+// Wallet authentication routes
 router.post(
-  '/register',
-  [
-    check('name', 'Name is required').not().isEmpty(),
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 })
-  ],
-  checkValidation,
-  register
-);
-
-router.post(
-  '/login',
-  [
-    check('email', 'Please include a valid email').isEmail(),
-    check('password', 'Password is required').exists()
-  ],
-  checkValidation,
-  login
-);
-
-// Crypto wallet authentication routes
-router.post(
-  '/wallet/init',
+  '/init',
   [
     check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress)
   ],
@@ -49,7 +25,7 @@ router.post(
 );
 
 router.post(
-  '/wallet/verify',
+  '/verify',
   [
     check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress),
     check('signature', 'Valid signature is required').custom(validators.isValidSignature)
@@ -58,28 +34,30 @@ router.post(
   verifyWalletAuth
 );
 
-// Connect wallet to existing account
-router.post(
-  '/wallet/connect',
+// User profile routes
+router.put(
+  '/profile',
   protect,
   [
-    check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress)
+    check('name', 'Name should be less than 50 characters').optional().isLength({ max: 50 }),
+    check('profileImage', 'Profile image must be a valid URL').optional().isURL()
   ],
   checkValidation,
-  connectWallet
+  updateProfile
 );
 
 // Smart contract integration routes
 router.post(
-  '/wallet/contract/auth',
+  '/contract/auth',
+  protect,
   [
-    check('stellarAddress', 'Valid Stellar address is required').custom(validators.isStellarAddress),
     check('contractId', 'Valid contract ID is required').custom(validators.isContractId),
     check('functionName', 'Function name is required').not().isEmpty()
   ],
   checkValidation,
   (req, res) => {
-    const { stellarAddress, contractId, functionName } = req.body;
+    const { contractId, functionName } = req.body;
+    const stellarAddress = req.user.stellarAddress; // Get from authenticated user
     const walletAuth = require('../utils/walletAuth');
     
     const authData = walletAuth.createContractAuthData(
@@ -99,7 +77,7 @@ router.post(
   }
 );
 
-// Other auth routes
+// User profile routes
 router.get('/me', protect, getMe);
 router.get('/logout', protect, logout);
 
