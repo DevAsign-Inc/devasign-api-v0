@@ -3,33 +3,25 @@ import { projectService } from './projectService';
 import { taskService } from './taskService';
 
 // Define interfaces for the response types
-interface ProjectResponse {
-  success: boolean;
-  data: {
-    _id: string;
-    name: string;
-    description: string;
-    owner: string;
-    repositoryUrl: string;
-    isOnChain: boolean;
-    contractTxHash?: string;
-    [key: string]: any;
-  };
-  error?: string;
+interface ProjectResponseData {
+  _id: string;
+  name: string;
+  description: string;
+  owner: string | { _id: string; name: string; stellarAddress: string };
+  repositoryUrl?: string;
+  isOnChain?: boolean;
+  contractTxHash?: string;
+  [key: string]: any;
 }
 
-interface TaskResponse {
-  success: boolean;
-  data: {
-    _id: string;
-    title: string;
-    description: string;
-    compensation: string;
-    status: string;
-    projectId: string;
-    [key: string]: any;
-  };
-  error?: string;
+interface TaskResponseData {
+  _id: string;
+  title: string;
+  description: string;
+  compensation: string;
+  status: string;
+  project: string;
+  [key: string]: any;
 }
 
 export const blockchainService = {
@@ -39,7 +31,7 @@ export const blockchainService = {
     name: string, 
     repositoryUrl: string, 
     description: string = ''
-  ): Promise<ProjectResponse['data']> => {
+  ): Promise<ProjectResponseData> => {
     try {
       // Step 1: Create project in MongoDB
       const backendResponse = await projectService.createProject({
@@ -58,31 +50,30 @@ export const blockchainService = {
       
       // Step 2: Register on blockchain (if possible)
       try {
+        // Our contract service returns a string (project ID or transaction hash)
         const contractResult = await ContractService.createProject(
           userAddress,
           name,
           repositoryUrl
         );
         
-        // Step 3: Update backend project with blockchain info
-        if (contractResult && typeof contractResult === 'object') {
-          const txHash: string = 'unknown';
-          
+        // If we have a contract result (string), use it as txHash
+        if (contractResult && typeof contractResult === 'string') {
           await projectService.updateProject(projectId, {
             isOnChain: true,
-            contractTxHash: txHash
+            contractTxHash: contractResult
           });
           
-          // Update the response data with blockchain info
+          // Update the response data
           backendResponse.data.isOnChain = true;
-          backendResponse.data.contractTxHash = txHash;
+          backendResponse.data.contractTxHash = contractResult;
         }
       } catch (blockchainError) {
         console.warn('Blockchain registration failed, continuing with backend-only project:', blockchainError);
         // We continue even if blockchain fails - project still exists in database
       }
       
-      return backendResponse.data;
+      return backendResponse.data as ProjectResponseData;
     } catch (error) {
       console.error('Failed to create project:', error);
       throw error;
@@ -96,7 +87,7 @@ export const blockchainService = {
     title: string, 
     description: string, 
     compensation: number
-  ): Promise<TaskResponse['data']> => {
+  ): Promise<TaskResponseData> => {
     try {
       // Step 1: Create task in MongoDB
       const backendResponse = await taskService.createTask(projectId, {
@@ -116,6 +107,7 @@ export const blockchainService = {
       
       // Step 2: Create on blockchain with escrow
       try {
+        // Our contract service returns a string (task ID or transaction hash)
         const contractResult = await ContractService.createTask(
           projectId,
           title,
@@ -124,25 +116,23 @@ export const blockchainService = {
           userAddress
         );
         
-        // Step 3: Update backend task with blockchain info
-        if (contractResult && typeof contractResult === 'object') {
-          const txHash: string = 'unknown';
-          
+        // If we have a contract result (string), use it as txHash
+        if (contractResult && typeof contractResult === 'string') {
           await taskService.updateTask(taskId, {
             isOnChain: true,
-            contractTxHash: txHash
+            contractTxHash: contractResult
           });
           
-          // Update the response data with blockchain info
+          // Update the response data
           backendResponse.data.isOnChain = true;
-          backendResponse.data.contractTxHash = txHash;
+          backendResponse.data.contractTxHash = contractResult;
         }
       } catch (blockchainError) {
         console.warn('Blockchain task creation failed, continuing with backend-only task:', blockchainError);
         // We continue even if blockchain fails
       }
       
-      return backendResponse.data;
+      return backendResponse.data as TaskResponseData;
     } catch (error) {
       console.error('Failed to create task:', error);
       throw error;
