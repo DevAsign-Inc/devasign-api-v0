@@ -1,4 +1,4 @@
-# DeVAsign - Deployment Guide
+# DevAsign - Deployment Guide
 
 This guide explains how to deploy the DeVAsign smart contract and connect it to the frontend application.
 
