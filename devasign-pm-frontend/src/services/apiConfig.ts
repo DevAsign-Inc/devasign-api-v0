@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Get the API URL from environment variables with fallback
+// Default to local development API if environment variable isn't set
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
 // Log API URL in development to help with debugging
@@ -30,7 +30,7 @@ apiClient.interceptors.request.use(
     
     // Log request URL in development mode
     if (process.env.NODE_ENV !== 'production') {
-      console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
+      console.log('API Request:', config.method?.toUpperCase(), `${config.baseURL ?? ''}${config.url}`);
     }
     
     return config;

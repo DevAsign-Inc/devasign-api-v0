@@ -182,24 +182,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const initResult = await authService.initWalletAuth(address);
       
       if (!initResult.success) {
+        console.error('Authentication initialization failed:', initResult.error);
         throw new Error(initResult.error || 'Failed to initialize authentication');
       }
+      
+      console.log('Authentication initialization successful');
       
       // The API returns { success: true, data: { message, nonce } }
       const { message, nonce } = initResult.data;
       
       // Step 2: Sign the message with Freighter
-      const signResult = await freighter.signMessage({
-        message,
-        pubkey: address
-      });
+      const signResult = await freighter.signMessage(message);
       
-      if (!signResult || !signResult.signature) {
+      if (!signResult || !('signature' in signResult) || !signResult.signature) {
         throw new Error('Failed to sign message with wallet');
       }
       
       // Step 3: Verify the signature with backend
-      const verifyResult = await authService.verifyWalletAuth(address, signResult.signature);
+      const verifyResult = await authService.verifyWalletAuth(address, signResult.signature as string);
       
       if (!verifyResult.success) {
         throw new Error(verifyResult.error || 'Failed to verify signature');
@@ -207,8 +207,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       
       const { token, user } = verifyResult;
       
-      // Store token for API authentication
-      localStorage.setItem('auth_token', token);
+      // Store token for API authentication if token is available
+      if (token) {
+        localStorage.setItem('auth_token', token);
+      } else {
+        throw new Error('Authentication token is undefined');
+      }
       
       // Update app state
       setUserAddress(address);
@@ -275,7 +279,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const projects = result.data.map(project => ({
         id: project._id,
         name: project.name,
-        managerAddress: project.owner.stellarAddress || project.owner,
+        managerAddress: typeof project.owner === 'object' ? project.owner.stellarAddress : project.owner,
         repositoryUrl: project.repositoryUrl || '',
         totalTasks: project.tasks?.length || 0
       }));
@@ -304,7 +308,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
       
       // Map backend tasks to our frontend format
-      const tasks = result.data.map(task => ({
+      interface BackendTask {
+        _id: string;
+        title: string;
+        description: string;
+        compensation: string;
+        project: string;
+        status: 'Open' | 'Assigned' | 'InProgress' | 'Completed' | 'Approved' | 'Rejected';
+        applicants?: string[];
+        assignedTo?: { stellarAddress: string } | string;
+        completionDate?: string;
+      }
+
+      interface FrontendTask {
+        id: string;
+        title: string;
+        description: string;
+        compensation: number;
+        projectId: string;
+        status: 'Open' | 'Assigned' | 'InProgress' | 'Completed' | 'Approved' | 'Rejected';
+        applicants: string[];
+        assignedDeveloper?: string;
+        completionDate?: number;
+      }
+
+      const tasks: FrontendTask[] = (result.data as BackendTask[]).map(task => ({
         id: task._id,
         title: task.title,
         description: task.description,
@@ -312,7 +340,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         projectId: task.project,
         status: task.status,
         applicants: task.applicants || [],
-        assignedDeveloper: task.assignedTo?.stellarAddress || task.assignedTo,
+        assignedDeveloper: typeof task.assignedTo === 'object' ? task.assignedTo?.stellarAddress : task.assignedTo,
         completionDate: task.completionDate ? new Date(task.completionDate).getTime() : undefined
       }));
       
