@@ -12,6 +12,7 @@ const CreateProjectForm: React.FC = () => {
   
   const [name, setName] = useState('');
   const [repositoryUrl, setRepositoryUrl] = useState('');
+  const [description, setDescription] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,6 +41,10 @@ const CreateProjectForm: React.FC = () => {
       const projectId = await createProject(name, repositoryUrl);
       
       if (projectId) {
+        // Show success feedback
+        // You could use a toast notification here
+        console.log('Project created successfully');
+        
         // Navigate to the new project page
         router.push(`/projects/${projectId}`);
       }
@@ -76,7 +81,7 @@ const CreateProjectForm: React.FC = () => {
             />
           </div>
           
-          <div className="mb-6">
+          <div className="mb-4">
             <label htmlFor="repositoryUrl" className="block text-sm font-medium mb-1">
               Repository URL
             </label>
@@ -89,6 +94,20 @@ const CreateProjectForm: React.FC = () => {
             <p className="mt-1 text-xs text-muted-foreground">
               Enter a valid GitHub or GitLab repository URL
             </p>
+          </div>
+          
+          <div className="mb-6">
+            <label htmlFor="description" className="block text-sm font-medium mb-1">
+              Description (Optional)
+            </label>
+            <textarea
+              id="description"
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief project description"
+              rows={3}
+            />
           </div>
           
           <div className="flex justify-end">

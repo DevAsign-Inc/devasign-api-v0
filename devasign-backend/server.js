@@ -14,8 +14,30 @@ const app = express();
 // Body parser
 app.use(express.json());
 
-// Enable CORS
-app.use(cors());
+// Set up CORS properly for both development and production
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://devasign-frontend.vercel.app',
+  process.env.FRONTEND_URL || 'http://localhost:3000'
+].filter(Boolean);
+
+// CORS configuration
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
+}));
 
 // Set security headers
 app.use(helmet());
@@ -58,12 +80,6 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
   );
 }
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.log(`Error: ${err.message}`);
-  // In Vercel, we don't need to close the server
-});
 
 // Export app for Vercel serverless function
 module.exports = app;

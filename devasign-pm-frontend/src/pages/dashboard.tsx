@@ -1,23 +1,18 @@
 import React, { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
 import ProjectCard from '@/components/project/ProjectCard';
 import { useApp } from '@/context/AppContext';
+import { useAuthProtection } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, Loader2, Plus, Layers, Code2, BellRing } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
-  const { isWalletConnected, userProjects, userTasks, loadUserProjects, loading, error } = useApp();
-  const router = useRouter();
+  const { userProjects, userTasks, loadUserProjects, loading, error } = useApp();
   
-  // Check if user is connected
-  useEffect(() => {
-    if (!isWalletConnected) {
-      router.push('/');
-    }
-  }, [isWalletConnected, router]);
+  // Protect this route - redirect to home if not authenticated
+  const { isWalletConnected } = useAuthProtection('/');
   
   // Load user projects when page loads
   useEffect(() => {

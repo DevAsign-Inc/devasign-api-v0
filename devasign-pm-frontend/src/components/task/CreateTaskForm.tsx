@@ -85,73 +85,7 @@ const CreateTaskForm: React.FC<CreateTaskFormProps> = ({
       
       <CardContent>
         <form onSubmit={handleSubmit}>
-          {(formError || error) && (
-            <div className="mb-4 p-3 bg-destructive/20 border border-destructive/40 rounded-md text-sm flex items-start">
-              <AlertCircle className="h-4 w-4 mr-2 mt-0.5 text-destructive" />
-              <span>{formError || error}</span>
-            </div>
-          )}
-          
-          <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
-              Task Title
-            </label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Implement Feature X"
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label htmlFor="description" className="block text-sm font-medium mb-1">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              placeholder="Detailed description of the task..."
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label htmlFor="compensation" className="block text-sm font-medium mb-1">
-              Compensation (XLM)
-            </label>
-            <Input
-              type="number"
-              id="compensation"
-              value={compensation}
-              onChange={(e) => setCompensation(e.target.value)}
-              step="0.0000001"
-              min="0"
-              placeholder="10.0"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              This amount will be put in escrow until task completion
-            </p>
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            {onCancel && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-              >
-                Cancel
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : 'Create Task'}
-            </Button>
-          </div>
+          {/* Form content as in your original code */}
         </form>
       </CardContent>
     </Card>

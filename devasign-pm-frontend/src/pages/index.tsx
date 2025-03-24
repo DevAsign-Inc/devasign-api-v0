@@ -2,12 +2,24 @@ import React from 'react';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
 import { useApp } from '@/context/AppContext';
+import { useRedirectAuthenticated } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, DollarSign, GitFork, UserCheck } from 'lucide-react';
 
 const HomePage: React.FC = () => {
-  const { isWalletConnected, connectWallet, loading } = useApp();
+  const { isWalletConnected, connectWallet, loading, error } = useApp();
+  
+  // Redirect if already logged in
+  useRedirectAuthenticated();
+  
+  const handleConnectWallet = async () => {
+    try {
+      await connectWallet();
+    } catch (err) {
+      console.error('Connection error:', err);
+    }
+  };
   
   return (
     <Layout>
@@ -23,6 +35,12 @@ const HomePage: React.FC = () => {
             and ensure transparent, fair compensation for developers.
           </p>
           
+          {error && (
+            <div className="mt-6 p-4 bg-destructive/20 border border-destructive/40 rounded-md">
+              <p className="text-destructive">{error}</p>
+            </div>
+          )}
+          
           <div className="mt-10">
             {isWalletConnected ? (
               <Link href="/dashboard">
@@ -33,7 +51,7 @@ const HomePage: React.FC = () => {
               </Link>
             ) : (
               <Button
-                onClick={connectWallet}
+                onClick={handleConnectWallet}
                 disabled={loading}
                 size="lg"
               >
