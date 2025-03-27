@@ -68,8 +68,8 @@ DevAsign is a Soroban-powered API and Linear plugin that revolutionizes task com
 ### Local Setup
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-org/devassign.git
-   cd devassign
+   git clone https://github.com/DevAsign-Inc/devasign-api-v0
+   cd devasign-api-v0
    ```
 
 2. Install dependencies
