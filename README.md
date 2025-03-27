@@ -1,105 +1,120 @@
-# DevAsign
+# DevAsign: Smart Contracts Meet Sprint Planning
 
-DevAsign is a decentralized task management and contribution platform designed to simplify how open-source projects coordinate work, incentivize contributions, and ensure transparent, fair compensation for developers.
+## 🌐 Project Overview
 
-## Core Value Propositions
+### Problem Statement
+Traditional task-based work payment systems are fundamentally broken:
+- High transaction fees (up to 20% on centralized platforms)
+- Slow cross-border payment processes
+- Limited cryptocurrency integration
+- Complex blockchain interactions for non-technical users
 
-- **Transparent Task Allocation**: Seamlessly convert GitHub/GitLab issues into trackable, blockchain-verified tasks.
-- **Trustless Compensation**: Automate developer payments based on verifiable task completion.
-- **Decentralized Accountability**: Eliminate intermediaries and create a trust-minimized contribution framework.
+### Solution
+DevAsign is a Soroban-powered API and Linear plugin that revolutionizes task compensation by enabling:
+- Instant, automated token bounties for completed tasks
+- Cross-border payments with minimal fees
+- Seamless integration with project management tools
 
-## System Overview
+## 🏗️ Technical Architecture
 
-DevAsign connects project managers with developers through a blockchain-powered platform that integrates with GitHub and GitLab. The system handles the entire workflow from task creation to payment disbursement.
+### Core Components
+1. **Soroban Smart Contract API**
+   - Programmable bounty release logic
+   - Support for multiple stablecoins (USDC, XLM)
+   - Automatic fund distribution upon task completion
 
-### Key Features
+2. **Linear Plugin**
+   - User-friendly interface for:
+     * Setting task bounties
+     * Selecting payment tokens
+     * Tracking payment history
 
-- Automatic wallet creation for users
-- GitHub/GitLab project import
-- Task creation and management
-- Escrow-protected compensation
-- Verifiable task completion
-- Automated payment release
+### Technology Stack
+- **Blockchain**: Stellar (Soroban)
+- **Smart Contract Language**: Rust
+- **Frontend Integration**: Linear plugin
+- **Payment Tokens**: USDC, XLM
 
-## Applications
+## 🧠 Technical Decision Rationale
 
-### Project Manager Application
+### Why Soroban?
+1. **Cost Efficiency**
+   - Sub-cent transaction fees
+   - Enables micro-transactions ($0.10 payouts)
 
-Project managers can:
-- Create a wallet automatically after authentication and KYC
-- Deposit funds into their wallet
-- Import existing projects from GitHub/GitLab
-- Create tasks with assigned compensation
-- Review developer applications and select candidates
-- Approve completed tasks
-- Monitor fund disbursement
+2. **Performance**
+   - 3-5 second settlement times
+   - Significantly faster than Ethereum
 
-### Developer Application
+3. **Asset Support**
+   - Native USDC integration
+   - Ideal for borderless payments
 
-Developers can:
-- Create a wallet automatically after authentication and KYC
-- Browse and filter the task pool
-- Apply for specific tasks with proposed completion timeframes
-- Complete tasks within the specified timeline
-- Receive automatic compensation upon task approval
+## 💻 Development Experience
 
-## Smart Contract Overview
+### Stellar Development Insights
+- Leveraged Rust's strong typing for robust smart contract development
+- Utilized Soroban's contract SDK for secure, efficient blockchain interactions
+- Learned and implemented Stellar's unique asset and payment models
 
-DevAsign utilizes the Soroban blockchain platform for smart contracts with the following components:
+## 🚀 Deployment Instructions
 
-### Escrow System
-- **Escrow Management Module**: Coordinates escrow lifecycle and fund management
-- **Task Escrow Initializer**: Creates and configures new task escrow contracts
-- **Fund Locking Module**: Manages fund holding and conditional release
-- **Disbursement Controller**: Handles fund release based on task completion
+### Prerequisites
+- Rust (latest stable version)
+- Soroban CLI
+- Linear workspace access
+- Stellar wallet with testnet XLM
 
-### Validation System
-- **Task Completion Verifier**: Validates task completion criteria and milestones
-- **Multi-Stage Approval Module**: Manages multi-party task validation and sign-off
-- **Dispute Resolution Module**: Provides mechanisms for resolving task completion disputes
+### Local Setup
+1. Clone the repository
+   ```bash
+   git clone https://github.com/your-org/devassign.git
+   cd devassign
+   ```
 
-## Technology Stack
+2. Install dependencies
+   ```bash
+   cargo build
+   npm install
+   ```
 
-### Backend
-- ExpressJS with TypeScript
-- PostgreSQL
-- Firebase (Authentication)
-- Rust (Smart Contract)
+3. Configure environment
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Stellar credentials
+   ```
 
-### Frontend
-- NextJS with TypeScript
+4. Deploy smart contracts
+   ```bash
+   soroban contract deploy --network testnet
+   ```
 
-### Infrastructure
-- Vercel for web application deployment
-- AWS App Runner for API deployment
+5. Install Linear plugin
+   - Navigate to Linear's custom apps section
+   - Upload `linear-plugin.json`
 
-### Automated Testing
-- Stellar Quickstart Image for integration testing
-- Jest for unit testing
-- Cypress for end-to-end testing
+### Testing
+- **Smart Contract Tests**:
+  ```bash
+  cargo test
+  ```
+- **Integration Tests**:
+  ```bash
+  npm run test:integration
+  ```
 
-### Integrations
-- GitHub & GitLab REST API
+## 🔐 Test Credentials
 
-## Getting Started
+### Testnet Wallet
+- **Address**: `GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
+- **Secret Key**: `SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
+- **Network**: Stellar Testnet
 
-(This section would include installation and setup instructions once the project is ready for deployment)
+**Note**: These are example credentials. Replace with actual test wallet details.
 
-## Contributing
+## 🌍 Vision
 
-(Information about contributing to the DevAsign project itself would go here)
+Transforming every project management tool into a gateway for decentralized, frictionless work economies.
 
-## License
-
-This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
-
-This means you are free to:
-- Share — copy and redistribute the material in any medium or format
-- Adapt — remix, transform, and build upon the material
-
-Under the following terms:
-- Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made.
-- NonCommercial — You may not use the material for commercial purposes.
-- ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
-
-For more information, see the full license text at: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+## 📜 License
+MIT License
