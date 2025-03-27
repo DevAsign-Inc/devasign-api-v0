@@ -27,3 +27,10 @@ release/
 # OS files
 .DS_Store
 Thumbs.db
+
+# deployment
+deploy-simplified.sh
+deploy-with-basic-key.sh
+deploy-with-key.sh
+deploy.sh
+*.sh
